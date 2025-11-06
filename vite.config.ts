@@ -1,3 +1,4 @@
+
 import path from 'path';
 // Fix: Import process to provide correct type definitions for process.cwd().
 import process from 'process';
@@ -13,7 +14,7 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        // Use a single, consistent environment variable for the API key.
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {

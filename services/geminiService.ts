@@ -1,8 +1,8 @@
+
 import { GoogleGenAI, Type } from '@google/genai';
 import { SheetRow } from '../types';
 
-// Fix: Per coding guidelines, initialize GoogleGenAI with process.env.API_KEY directly.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// The GoogleGenAI instance is now created inside the function to prevent app crash on startup.
 
 const responseSchema = {
     type: Type.ARRAY,
@@ -26,11 +26,14 @@ const responseSchema = {
 };
 
 export const generateSampleData = async (): Promise<Omit<SheetRow, 'id'>[]> => {
-  // Fix: Per coding guidelines, check for process.env.API_KEY directly.
-  if (!process.env.API_KEY) {
-    throw new Error("Gemini API key is not configured.");
+  // Check for the API key first. If it's not present, we can't proceed.
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Gemini API key is not configured. Please set the GEMINI_API_KEY environment variable.");
   }
   try {
+    // Initialize the AI client only when the function is called.
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: 'Generate a list of 5 realistic camera log entries for a visual effects heavy sci-fi action scene. Include varied and plausible technical details for each entry.',
