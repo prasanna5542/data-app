@@ -1,13 +1,11 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Project, ShootLog, SheetRow } from '../types';
 import EditableTableCell from './EditableTableCell';
 import { TrashIcon } from './icons/TrashIcon';
 import { PlusIcon } from './icons/PlusIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
 import { exportLogToCSV } from '../services/exportService';
-import { generateSampleData } from '../services/geminiService';
 import { BackIcon } from './icons/BackIcon';
 
 interface DateViewProps {
@@ -32,10 +30,6 @@ const columns: { key: keyof Omit<SheetRow, 'id'>, label: string, className?: str
 ];
 
 const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, onBack }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const apiKeyExists = !!process.env.GEMINI_API_KEY;
-
   const updateCell = useCallback((rowIndex: number, columnKey: keyof Omit<SheetRow, 'id'>, value: string) => {
     const newData = [...shootLog.data];
     newData[rowIndex] = { ...newData[rowIndex], [columnKey]: value };
@@ -73,27 +67,9 @@ const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, on
     const newData = shootLog.data.filter((_, index) => index !== rowIndex);
     onUpdateData(newData);
   };
-  
-  const handleGenerateSample = async () => {
-    if (!apiKeyExists) return;
-    setIsGenerating(true);
-    setError(null);
-    try {
-        const sampleRows = await generateSampleData();
-        const newRows: SheetRow[] = sampleRows.map((row) => ({
-            ...row,
-            id: crypto.randomUUID(),
-        }));
-        onUpdateData([...shootLog.data, ...newRows]);
-    } catch(err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-    } finally {
-        setIsGenerating(false);
-    }
-  };
 
   return (
-    <div className="animate-fade-in flex flex-col h-full max-w-full mx-auto">
+    <div className="flex flex-col h-full max-w-full mx-auto">
       <div className="mb-6">
         <div className="flex items-center gap-4">
             <button onClick={onBack} className="p-2 rounded-full bg-surface hover:bg-surface-light transition-colors" title={`Back to ${project.name}`}>
@@ -120,15 +96,6 @@ const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, on
         <button onClick={() => exportLogToCSV(project, shootLog)} className="flex items-center gap-2 bg-surface hover:bg-surface-light text-text-primary font-bold py-2 px-4 rounded-lg border border-border transition-colors duration-300">
           <DownloadIcon /> Export CSV
         </button>
-        <button 
-          onClick={handleGenerateSample} 
-          disabled={isGenerating || !apiKeyExists} 
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          title={!apiKeyExists ? 'Set GEMINI_API_KEY environment variable to enable this feature.' : 'Generate sample data using AI'}
-        >
-          <SparklesIcon /> {isGenerating ? 'Generating...' : 'Generate Sample'}
-        </button>
-        {error && <div className="bg-red-900 border border-red-700 text-red-200 px-3 py-2 rounded-lg text-sm">{error}</div>}
       </div>
 
       <div className="flex-grow overflow-auto bg-surface rounded-lg shadow-lg border border-border">

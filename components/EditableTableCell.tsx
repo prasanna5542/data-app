@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface EditableTableCellProps {
@@ -16,10 +17,12 @@ const EditableTableCell: React.FC<EditableTableCellProps> = ({ value, onUpdate, 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const cellRef = useRef<HTMLTableCellElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -53,7 +56,7 @@ const EditableTableCell: React.FC<EditableTableCellProps> = ({ value, onUpdate, 
     }
   };
 
-  // Effect to handle clicks outside the modal
+  // Effect to handle clicks outside the edit modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -68,10 +71,27 @@ const EditableTableCell: React.FC<EditableTableCellProps> = ({ value, onUpdate, 
     };
   }, [isEditing]);
 
-  // Effect to handle clicks outside the dropdown
+  // Effect to calculate dropdown position
+  useEffect(() => {
+    if (isDropdownOpen && cellRef.current) {
+        const rect = cellRef.current.getBoundingClientRect();
+        setDropdownPosition({
+            top: rect.bottom,
+            left: rect.left,
+            width: rect.width,
+        });
+    } else {
+        setDropdownPosition(null);
+    }
+  }, [isDropdownOpen]);
+
+  // Effect to handle clicks outside the dropdown (cell + portal)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (cellRef.current && !cellRef.current.contains(event.target as Node)) {
+      if (
+        cellRef.current && !cellRef.current.contains(event.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -105,7 +125,51 @@ const EditableTableCell: React.FC<EditableTableCellProps> = ({ value, onUpdate, 
   }
 
   const baseClasses = `px-4 py-2 text-sm text-text-primary align-top transition-colors`;
-  const dynamicClasses = isNote ? 'whitespace-normal' : 'whitespace-nowrap';
+  const dynamicClasses = isNote ? 'whitespace-normal' : 'truncate';
+
+  const DropdownPortal = () => {
+    if (!isDropdownOpen || !dropdownPosition) return null;
+
+    return createPortal(
+        <div
+            ref={dropdownRef}
+            style={{
+                position: 'fixed',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                minWidth: `${dropdownPosition.width}px`,
+            }}
+            className="w-max bg-surface-light border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
+        >
+            {suggestions.map((suggestion) => (
+                <div
+                    key={suggestion}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdate(suggestion);
+                        setIsDropdownOpen(false);
+                    }}
+                    className="px-3 py-2 text-sm text-text-primary hover:bg-primary hover:text-black cursor-pointer"
+                >
+                    {suggestion}
+                </div>
+            ))}
+            {suggestions.length > 0 && <div className="border-t border-border my-1"></div>}
+            <div
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(false);
+                    setIsEditing(true);
+                }}
+                className="px-3 py-2 text-sm text-text-primary hover:bg-primary hover:text-black cursor-pointer"
+            >
+                Custom...
+            </div>
+        </div>,
+        document.body
+    );
+  };
+
 
   return (
     <>
@@ -116,50 +180,23 @@ const EditableTableCell: React.FC<EditableTableCellProps> = ({ value, onUpdate, 
           className={`${baseClasses} cursor-pointer relative min-h-[44px] ${className || ''} ${dynamicClasses}`}
         >
           <div className="flex items-center justify-between w-full">
-            <span>{value || <span className="text-gray-600 italic">...</span>}</span>
+            <span className="truncate">{value || <span className="text-gray-600 italic">...</span>}</span>
             <ChevronDownIcon className="h-4 w-4 text-gray-500 ml-2 flex-shrink-0" />
           </div>
-
-          {isDropdownOpen && (
-            <div className="absolute top-full left-0 mt-1 w-max min-w-full bg-surface-light border border-border rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <div
-                  key={suggestion}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdate(suggestion);
-                    setIsDropdownOpen(false);
-                  }}
-                  className="px-3 py-2 text-sm text-text-primary hover:bg-primary hover:text-black cursor-pointer"
-                >
-                  {suggestion}
-                </div>
-              ))}
-              {suggestions.length > 0 && <div className="border-t border-border my-1"></div>}
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDropdownOpen(false);
-                  setIsEditing(true);
-                }}
-                className="px-3 py-2 text-sm text-text-primary hover:bg-primary hover:text-black cursor-pointer"
-              >
-                Custom...
-              </div>
-            </div>
-          )}
         </td>
       ) : (
         <td
           onClick={() => setIsEditing(true)}
           className={`${baseClasses} cursor-cell min-h-[44px] ${className || ''} ${dynamicClasses}`}
         >
-          {value || <span className="text-gray-600 italic">...</span>}
+          <span className={isNote ? '' : 'truncate'}>{value || <span className="text-gray-600 italic">...</span>}</span>
         </td>
       )}
 
+      <DropdownPortal />
+
       {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
           <div ref={modalRef} className="bg-surface w-full max-w-md rounded-lg shadow-xl border border-border p-6" onKeyDown={handleKeyDown}>
             <h2 className="text-xl font-semibold text-text-primary mb-4">Edit {columnLabel}</h2>
             <div className="relative">

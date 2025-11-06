@@ -39,7 +39,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
       <div ref={modalRef} className="bg-surface w-full max-w-md rounded-lg shadow-xl border border-border p-6">
         <h2 className="text-xl font-semibold text-text-primary mb-2">{title}</h2>
         <p className="text-text-secondary mb-6">{message}</p>

@@ -103,7 +103,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
 
 
   return (
-    <div className="animate-fade-in max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center gap-4">
                 <button onClick={onBack} className="p-2 rounded-full bg-surface hover:bg-surface-light transition-colors" title="Back to Projects">
@@ -171,7 +171,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         </button>
 
         {isPresetsSectionOpen && (
-          <div id="presets-content" className="p-6 pt-4 border-t border-border animate-fade-in">
+          <div id="presets-content" className="p-6 pt-4 border-t border-border">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Lens Presets */}
               <div className="bg-background rounded-lg border border-border p-4">
@@ -195,7 +195,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 <div className="flex flex-wrap gap-1.5 min-h-[24px]">
                     {(project.lensPresets && project.lensPresets.length > 0) ? (
                         project.lensPresets.map(lens => (
-                            <div key={lens} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary animate-fade-in">
+                            <div key={lens} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary">
                                 <span>{lens}</span>
                                 <button onClick={() => onDeleteLensPreset(lens)} className="text-gray-500 hover:text-red-400 rounded-full hover:bg-gray-600 p-0.5 transition-colors">
                                     <XIcon />
@@ -228,7 +228,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 <div className="flex flex-wrap gap-1.5 min-h-[24px]">
                     {(project.cameraNamePresets && project.cameraNamePresets.length > 0) ? (
                         project.cameraNamePresets.map(name => (
-                            <div key={name} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary animate-fade-in">
+                            <div key={name} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary">
                                 <span>{name}</span>
                                 <button onClick={() => onDeleteCameraNamePreset(name)} className="text-gray-500 hover:text-red-400 rounded-full hover:bg-gray-600 p-0.5 transition-colors">
                                     <XIcon />
@@ -261,7 +261,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 <div className="flex flex-wrap gap-1.5 min-h-[24px]">
                     {(project.cameraModelPresets && project.cameraModelPresets.length > 0) ? (
                         project.cameraModelPresets.map(model => (
-                            <div key={model} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary animate-fade-in">
+                            <div key={model} className="flex items-center gap-1.5 bg-surface-light rounded-full px-2.5 py-1 text-xs text-text-primary">
                                 <span>{model}</span>
                                 <button onClick={() => onDeleteCameraModelPreset(model)} className="text-gray-500 hover:text-red-400 rounded-full hover:bg-gray-600 p-0.5 transition-colors">
                                     <XIcon />

@@ -43,7 +43,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onSelectProject, on
     };
 
     return (
-        <div className="animate-fade-in max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-4xl font-bold text-text-primary">Projects</h1>
             </div>
