@@ -1,0 +1,5 @@
+{
+  "name": "v2",
+  "description": "A data wrangling application for collecting and managing camera details for VFX projects. Organize data by project and shoot date, enter details in a spreadsheet-like interface, and export reports.",
+  "requestFramePermissions": []
+}
