@@ -15,10 +15,12 @@ const App: React.FC = () => {
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Load projects from storage immediately on component mount.
     setProjects(getProjects());
   }, []);
 
   useEffect(() => {
+    // Save projects to storage whenever they change.
     saveProjects(projects);
   }, [projects]);
 

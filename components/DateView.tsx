@@ -33,6 +33,7 @@ const columns: { key: keyof Omit<SheetRow, 'id'>, label: string, className?: str
 const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, onBack }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const apiKeyExists = !!process.env.API_KEY;
 
   const updateCell = useCallback((rowIndex: number, columnKey: keyof Omit<SheetRow, 'id'>, value: string) => {
     const newData = [...shootLog.data];
@@ -73,6 +74,7 @@ const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, on
   };
   
   const handleGenerateSample = async () => {
+    if (!apiKeyExists) return;
     setIsGenerating(true);
     setError(null);
     try {
@@ -117,7 +119,12 @@ const DateView: React.FC<DateViewProps> = ({ project, shootLog, onUpdateData, on
         <button onClick={() => exportLogToCSV(project, shootLog)} className="flex items-center gap-2 bg-surface hover:bg-surface-light text-text-primary font-bold py-2 px-4 rounded-lg border border-border transition-colors duration-300">
           <DownloadIcon /> Export CSV
         </button>
-        <button onClick={handleGenerateSample} disabled={isGenerating} className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button 
+          onClick={handleGenerateSample} 
+          disabled={isGenerating || !apiKeyExists} 
+          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={!apiKeyExists ? 'Gemini API key not configured. This feature is disabled.' : 'Generate sample data using AI'}
+        >
           <SparklesIcon /> {isGenerating ? 'Generating...' : 'Generate Sample'}
         </button>
         {error && <div className="bg-red-900 border border-red-700 text-red-200 px-3 py-2 rounded-lg text-sm">{error}</div>}
